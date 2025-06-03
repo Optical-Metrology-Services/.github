@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-ty;e: Feature
+type: Feature
 labels: blocked
 assignees: ''
 
