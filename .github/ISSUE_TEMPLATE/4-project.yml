@@ -1,0 +1,26 @@
+name: New Project
+description: Start planning a new releaes.
+title: "[Project]: "
+labels: ["triage", "team-planning"]
+type: "project"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        * Projects are used for release planning and road-mapping and should only be created by a member of the software team.
+  - type: input
+    id: version-number
+    attributes:
+      label: Planned Version Number
+      description: "Please enter the expected version number for this release."
+      placeholder: V1.2.3
+    validations:
+      required: true
+  - type: input
+    id: due-date
+    attributes:
+      label: Due Date
+      description: "What is the expected release date, if known (in DD/MM/YYYY format):"
+      placeholder: "eg. DD/MM/YYYY"
+    validations:
+      required: false
