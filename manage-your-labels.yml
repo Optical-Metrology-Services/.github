@@ -1,0 +1,68 @@
+LABEL_GROUPS:
+  DEFAULT:
+    team-planning:
+      description: Assigned to the planning team for assessment and roadmapping
+      color: 9013fe
+    team-software:
+      description: Assigned to the software team
+      color: 1566ff
+    triage:
+      description: Awaiting assessment and assignment
+      color: '000000'
+      old_names:
+        - blocked
+    icebox:
+      description: On hold or being considered for a future release
+      color: 95efeb
+    backlog:
+      description: Planned for a future release
+      color: '423206'
+    approved:
+      description: Approved for work
+      color: 0e8a16
+    cannot reproduce:
+      description: Cannot reproduce bug with information given
+      color: ff0000
+    confirmed:
+      description: Bug has been preproduced and needs fixing
+      color: 26c129
+    duplicate:
+      description: This issue or pull request already exists
+      color: '808080'
+    expected behaviour:
+      description: Reported bug is expected behaviour and may not be fixed
+      color: f0f0f0
+    pending discussion:
+      description: issue requires clarification or further information
+      color: ad4aff
+    won't fix:
+      description: Issue will not be progressed
+      color: feacad
+    severity-high:
+      description: breaking or safety critical
+      color: ff0000
+      old_names:
+        - critical
+    severity-medium:
+      description: incorrect or bad functionality
+      color: ca592c
+      old_names:
+        - high severity
+    severity-low:
+      description: cosmetic, formatting etc...
+      color: eff364
+      old_names:
+        - medium severity
+    P1:
+      description: 1st priority
+      color: 006b75
+    P2:
+      description: 2nd priority
+      color: 006b75
+    P3:
+      description: 3rd priority
+      color: 006b75
+    P4:
+      description: 4th priority
+      color: 006b75
+REPOS:
