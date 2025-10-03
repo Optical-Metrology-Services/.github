@@ -1,68 +1,79 @@
 LABEL_GROUPS:
   DEFAULT:
-    team-planning:
-      description: Assigned to the planning team for assessment and roadmapping
+    team planning:
+      description: assigned to the planning team for assessment and roadmapping
       color: 9013fe
-    team-software:
-      description: Assigned to the software team
+    team software:
+      description: assigned to the software team
       color: 1566ff
     triage:
-      description: Awaiting assessment and assignment
+      description: awaiting assessment and assignment
       color: '000000'
       old_names:
         - blocked
     icebox:
-      description: On hold or being considered for a future release
+      description: on hold for future consideration
       color: 95efeb
     backlog:
-      description: Planned for a future release
-      color: '423206'
+      description: planned for a future release
+      color: e6e6e6
     approved:
-      description: Approved for work
+      description: approved for work
       color: 0e8a16
     cannot reproduce:
-      description: Cannot reproduce bug with information given
-      color: ff0000
+      description: cannot reproduce bug with information given
+      color: fbca04
     confirmed:
-      description: Bug has been preproduced and needs fixing
+      description: bug has been preproduced and needs fixing
       color: 26c129
     duplicate:
-      description: This issue or pull request already exists
+      description: this issue or pull request already exists
       color: '808080'
     expected behaviour:
-      description: Reported bug is expected behaviour and may not be fixed
+      description: reported bug is expected behaviour and may not be fixed
       color: f0f0f0
     pending discussion:
       description: issue requires clarification or further information
       color: ad4aff
     won't fix:
-      description: Issue will not be progressed
+      description: issue will not be progressed
       color: feacad
-    severity-high:
+    severity high:
       description: breaking or safety critical
-      color: ff0000
+      color: d73a4a
       old_names:
         - critical
-    severity-medium:
+        - severity-high
+    severity medium:
       description: incorrect or bad functionality
-      color: ca592c
+      color: fbca04
       old_names:
         - high severity
-    severity-low:
+        - severity-medium
+    severity low:
       description: cosmetic, formatting etc...
-      color: eff364
+      color: 91ca55
       old_names:
         - medium severity
-    P1:
+        - severity-low
+    priority 1:
       description: 1st priority
-      color: 006b75
-    P2:
+      color: d73a4a
+      old_names:
+        - P1
+    priority 2:
       description: 2nd priority
-      color: 006b75
-    P3:
+      color: ffb8c6
+      old_names:
+        - P2
+    priority 3:
       description: 3rd priority
-      color: 006b75
-    P4:
+      color: fbca04
+      old_names:
+        - P3
+    priority 4:
       description: 4th priority
-      color: 006b75
+      color: 91ca55
+      old_names:
+        - P4
 REPOS:
