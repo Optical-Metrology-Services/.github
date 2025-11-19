@@ -2,7 +2,10 @@
 
 Please include a summary of the changes(s) and the related issue(s). Please also include relevant motivation and context. List any dependencies that are required for this change.
 
-Fixes #(issue)
+- Fixes #{ISSUE1}
+{please provide a brief description of the fix}
+- Fixes #{ISSUE2}
+{please provide a brief description of the fix}
 
 # Checklist:
 Check on completion of each item, PR is ready for review when all items are checked
