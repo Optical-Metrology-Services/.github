@@ -7,7 +7,7 @@ Please include a summary of the changes(s) and the related issue(s). Please also
 - Fixes #{ISSUE2}
 {please provide a brief description of the fix}
 
-# Checklist:
+# Feature / Bug Checklist:
 Check on completion of each item, PR is ready for review when all items are checked
 
 - [ ] My code follows the style guidelines of this project
@@ -16,3 +16,16 @@ Check on completion of each item, PR is ready for review when all items are chec
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have provided test evidence showing my changes function as expected and have not broken existing functionality
+
+# Release Checklist:
+Check on completion of each item, PR is ready for review when all items are checked
+
+- [ ] Version number updated
+- [ ] Documentation updated
+- [ ] Release test plan generated and uploaded
+- [ ] Pre-release created
+- [ ] Release testing completed
+- [ ] Issue specific code commants or bookmarks removed
+- [ ] Final build generated sucessfully
+
+*Delete checklist based on pull request type*
