@@ -25,7 +25,7 @@ Check on completion of each item, PR is ready for review when all items are chec
 - [ ] Release test plan generated and uploaded
 - [ ] Pre-release created
 - [ ] Release testing completed
-- [ ] Issue specific code commants or bookmarks removed
-- [ ] Final build generated sucessfully
+- [ ] Issue specific code comments or bookmarks removed
+- [ ] Final build generated successfully
 
 *Delete checklist based on pull request type*
