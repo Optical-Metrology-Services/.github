@@ -14,7 +14,7 @@ Check on completion of each item, PR is ready for review when all items are chec
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
+- [ ] My changes generate no new build errors or warnings
 - [ ] I have provided test evidence showing my changes function as expected and have not broken existing functionality
 
 # Release Checklist:
