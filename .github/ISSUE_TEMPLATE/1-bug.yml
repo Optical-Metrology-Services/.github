@@ -51,7 +51,7 @@ body:
       options:
         - Every time
         - Most times
-        - Ocassionally
+        - Occasionally
         - Rarely
       default: 3
     validations:
