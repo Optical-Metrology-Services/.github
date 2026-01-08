@@ -1,0 +1,63 @@
+name: New Epic
+description: Create a new Epic (an encapsulation of large change or feature).
+title: "[Epic]: "
+labels: ["triage", "team-planning"]
+type: "epic"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        * Epics are encapsulations of large feature sets and should only be raised by a developer or software team member.
+        * Please check existing issues to ensure your request is not a duplicate or covered by an existing request, if it is then feel free to add comments to them highlighting your project and requirements
+  - type: input
+    id: project-name
+    attributes:
+      label: Project Name(s)
+      description: "Please provide the project name(s) that your request is associated with, if there is no specific project use 'software improvement'."
+      placeholder: eg. Amazon, Software Improvement
+    validations:
+      required: true
+  - type: input
+    id: project-code
+    attributes:
+      label: Project Code(s)
+      description: "Please provide the project code(s) that your request is associated with, if the project is 'software improvement' use code '642'"
+      placeholder: eg. 889, 642
+    validations:
+      required: true
+  - type: input
+    id: due-date
+    attributes:
+      label: Due Date
+      description: "If this issue has a fixed delivery date please provide the date here (in DD/MM/YYYY format):"
+      placeholder: "eg. DD/MM/YYYY"
+    validations:
+      required: false      
+  - type: textarea
+    id: problem-related
+    attributes:
+      label: Is your feature request related to a problem?
+      description: Please provide a clear and concise description of what the problem is.
+      placeholder: eg. I'm facing the issue/missing function...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Describe the solution you'd like"
+      description: Please provide a clear and concise description of what you want to happen.
+      placeholder: eg. When using this function...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: "Please provide a clear and concise description of any alternative solutions or features you've considered."
+      placeholder: "ex. Choosing other approach wouldn't work, because..."
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Please add any other context or screenshots about the feature request here.
+      placeholder: ex. This would work only when ...

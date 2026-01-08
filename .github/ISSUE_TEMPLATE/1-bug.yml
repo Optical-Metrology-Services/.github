@@ -1,0 +1,74 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["triage", "team-planning"]
+type: "bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what happened!
+      value: "A bug happened!"
+    validations:
+      required: true
+  - type: textarea
+    id: to-reproduce
+    attributes:
+      label: How can we reproduce the bug?
+      description: Provide as much information as possible on the steps needed to recreate the problem.
+      placeholder: Tell how to reproduce it!
+      value: |
+        1.
+        2.
+        3.
+        ...
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: How severe is the bug?
+      options:
+        - Critical, I cannot complete my work or the system is unsafe
+        - Very severe
+        - Not very severe
+        - "It's an irritation, but doesn't stop my work"
+      default: 3
+    validations:
+      required: true         
+  - type: dropdown
+    id: repeatability
+    attributes:
+      label: How often does the issue appear?
+      options:
+        - Every time
+        - Most times
+        - Occasionally
+        - Rarely
+      default: 3
+    validations:
+      required: true    
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of our software are you running?
+      placeholder: vX.Y.Z
+    validations:
+      required: true
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Provide any relevant additional information about hardware, project, and operating system.
+      description: Any information which will help us in testing, reproducing, or determining issue priority should be added here.
+      placeholder: Anything else?
+    validations:
+      required: false

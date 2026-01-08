@@ -1,0 +1,79 @@
+LABEL_GROUPS:
+  DEFAULT:
+    team planning:
+      description: assigned to the planning team for assessment and roadmapping
+      color: 9013fe
+    team software:
+      description: assigned to the software team
+      color: 1566ff
+    triage:
+      description: awaiting assessment and assignment
+      color: '000000'
+      old_names:
+        - blocked
+    icebox:
+      description: on hold for future consideration
+      color: 95efeb
+    backlog:
+      description: planned for a future release
+      color: e6e6e6
+    approved:
+      description: approved for work
+      color: 0e8a16
+    cannot reproduce:
+      description: cannot reproduce bug with information given
+      color: fbca04
+    confirmed:
+      description: bug has been preproduced and needs fixing
+      color: 26c129
+    duplicate:
+      description: this issue or pull request already exists
+      color: '808080'
+    expected behaviour:
+      description: reported bug is expected behaviour and may not be fixed
+      color: f0f0f0
+    pending discussion:
+      description: issue requires clarification or further information
+      color: ad4aff
+    won't fix:
+      description: issue will not be progressed
+      color: feacad
+    severity high:
+      description: breaking or safety critical
+      color: d73a4a
+      old_names:
+        - critical
+        - severity-high
+    severity medium:
+      description: incorrect or bad functionality
+      color: fbca04
+      old_names:
+        - high severity
+        - severity-medium
+    severity low:
+      description: cosmetic, formatting etc...
+      color: 91ca55
+      old_names:
+        - medium severity
+        - severity-low
+    priority 1:
+      description: 1st priority
+      color: d73a4a
+      old_names:
+        - P1
+    priority 2:
+      description: 2nd priority
+      color: ffb8c6
+      old_names:
+        - P2
+    priority 3:
+      description: 3rd priority
+      color: fbca04
+      old_names:
+        - P3
+    priority 4:
+      description: 4th priority
+      color: 91ca55
+      old_names:
+        - P4
+REPOS:
