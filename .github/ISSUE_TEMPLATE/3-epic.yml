@@ -1,7 +1,7 @@
 name: New Epic
 description: Create a new Epic (an encapsulation of large change or feature).
 title: "[Epic]: "
-labels: ["triage", "team-planning"]
+labels: ["triage", "team planning"]
 type: "epic"
 body:
   - type: markdown
