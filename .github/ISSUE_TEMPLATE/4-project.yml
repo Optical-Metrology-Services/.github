@@ -1,7 +1,7 @@
 name: New Project
 description: Start planning a new release.
 title: "[Project]: "
-labels: ["triage", "team-planning"]
+labels: ["triage", "team planning"]
 type: "project"
 body:
   - type: markdown
