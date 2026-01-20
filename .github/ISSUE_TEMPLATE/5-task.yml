@@ -1,4 +1,4 @@
-name: New Project
+name: New Task
 description: Create a non-development based task.
 title: "[Task]: "
 labels: ["triage", "team planning"]
@@ -9,11 +9,11 @@ body:
       value: |
         * Tasks are used by the software team to plan non-development activities such as documentation and research.
   - type: input
-    id: task-description
+    id: description
     attributes:
       label: Description
       description: "Please a detailed description of the task."
-      placeholder: "..."
+      placeholder: ...
     validations:
       required: true
   - type: input
