@@ -9,7 +9,7 @@ body:
       value: |
         * Tasks are used by the software team to plan non-development activities such as documentation and research.
   - type: input
-    id: description
+    id: task-description
     attributes:
       label: Description
       description: "Please a detailed description of the task."
