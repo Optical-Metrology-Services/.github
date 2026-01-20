@@ -8,7 +8,7 @@ body:
     attributes:
       value: |
         * Tasks are used by the software team to plan non-development activities such as documentation and research.
-  - type: input
+  - type: textarea
     id: description
     attributes:
       label: Description
