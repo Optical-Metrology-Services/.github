@@ -1,0 +1,26 @@
+name: New Project
+description: Create a non-development based task.
+title: "[Task]: "
+labels: ["triage", "team planning"]
+type: "task"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        * Tasks are used by the software team to plan non-development activities such as documentation and research.
+  - type: input
+    id: description
+    attributes:
+      label: Description
+      description: "Please a detailed description of the task."
+      placeholder: ...
+    validations:
+      required: true
+  - type: input
+    id: due-date
+    attributes:
+      label: Due Date
+      description: "When should this task be completed by? (in DD/MM/YYYY format):"
+      placeholder: "eg. DD/MM/YYYY"
+    validations:
+      required: false
