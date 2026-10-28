@@ -76,13 +76,4 @@ LABEL_GROUPS:
       color: 91ca55
       old_names:
         - P4
-    needs-template:
-      description: issue does not match its issue form
-      color: e99695
-    claude-not-permitted:
-      description: issue type that Claude may not create, carrying the Claude marker
-      color: b60205
-    claude-assisted:
-      description: pull request contains Claude-assisted work
-      color: 5319e7
 REPOS:
