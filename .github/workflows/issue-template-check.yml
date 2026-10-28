@@ -1,0 +1,117 @@
+# Reusable workflow: checks a new or edited issue against its organisation issue form.
+# - Finds the form (in the org .github repo) whose `type:` matches the issue's type, and checks that every
+#   labelled field has its "### <label>" section, that required fields are not empty, and that dropdown
+#   answers are one of the form's options. Failures get the `needs-template` label and a comment, which
+#   clear themselves once the issue passes.
+# - Epic, Project, Initiative and Sub-task issues that carry the Claude marker get `claude-not-permitted`.
+# - Applies the form's own labels (for example triage and team planning) to issues that were not created through the
+#   web form, which applies them itself: only when the issue is opened or gets its type, and only if it has none of
+#   those labels yet, so a later edit never puts back a label someone removed. This is how issues Claude creates
+#   get their labels, since Claude may not change labels.
+# - Afterwards it re-runs work-approval, because labels set with this workflow's token do not start other workflows.
+# Called from each repo by .github/workflows/issue-template-check.yml (see deploy/each-repo).
+name: issue-template-check
+on:
+  workflow_call:
+    inputs:
+      template_repo: { type: string, default: Optical-Metrology-Services/.github }
+      template_dir: { type: string, default: .github/ISSUE_TEMPLATE }
+      since: { type: string, default: "2026-10-27" }
+      marker: { type: string, default: "AI-Assisted: claude-code" }
+      claude_blocked_types: { type: string, default: "Epic Project Initiative Sub-task" }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the issue against its form
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ github.event.issue.number }}
+          ACTION: ${{ github.event.action }}
+          TEMPLATE_REPO: ${{ inputs.template_repo }}
+          TEMPLATE_DIR: ${{ inputs.template_dir }}
+          SINCE: ${{ inputs.since }}
+          MARKER: ${{ inputs.marker }}
+          BLOCKED_TYPES: ${{ inputs.claude_blocked_types }}
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"
+          issue=$(gh api "repos/$repo/issues/$NUM")
+          created=$(jq -r .created_at <<<"$issue")
+          if [[ "$created" < "$SINCE" ]]; then echo "Created before $SINCE; skipping"; exit 0; fi
+          type=$(jq -r '.type.name // ""' <<<"$issue")
+          body=$(jq -r '.body // ""' <<<"$issue" | tr -d '\r')
+
+          settle() {   # settle <label> <problem>...   (no problems: clear the label and comment)
+            local label=$1 mark cid msg p; shift
+            mark="<!-- issue-check:$label -->"
+            cid=$(gh api --paginate "repos/$repo/issues/$NUM/comments" \
+              --jq ".[] | select(.body | contains(\"$mark\")) | .id" | head -n1 || true)
+            if [ $# -gt 0 ]; then
+              msg="$mark"$'\n'"This issue needs attention:"$'\n'
+              for p in "$@"; do msg+="- $p"$'\n'; done
+              msg+=$'\n'"Edit the issue to fix this; the $label label clears automatically."
+              gh issue edit "$NUM" -R "$repo" --add-label "$label"
+              if [ -n "$cid" ]; then gh api -X PATCH "repos/$repo/issues/comments/$cid" -f body="$msg" >/dev/null
+              else gh issue comment "$NUM" -R "$repo" --body "$msg" >/dev/null; fi
+            else
+              gh issue edit "$NUM" -R "$repo" --remove-label "$label" || true
+              [ -z "$cid" ] || gh api -X DELETE "repos/$repo/issues/comments/$cid" >/dev/null
+            fi
+          }
+
+          # 1. People own epics, projects, initiatives and sub-tasks: flag any that carry the Claude marker
+          claude_problems=()
+          for t in $BLOCKED_TYPES; do
+            if [ "${type,,}" = "${t,,}" ] && grep -qF "$MARKER" <<<"$body"; then
+              claude_problems+=("$type issues must be created by a person, not by Claude.")
+            fi
+          done
+
+          # 2. Compare the body with the issue form for this type
+          form_problems=(); tpl=""
+          if [ -z "$type" ]; then
+            form_problems+=("The issue has no type. Create issues from one of the organisation's issue forms.")
+          else
+            while read -r path; do
+              y=$(gh api -H "Accept: application/vnd.github.raw+json" \
+                "repos/$TEMPLATE_REPO/contents/$path" | yq -o=json '.')
+              ft=$(jq -r '.type // ""' <<<"$y")
+              if [ -n "$ft" ] && [ "${ft,,}" = "${type,,}" ]; then tpl="$y"; break; fi
+            done < <(gh api "repos/$TEMPLATE_REPO/contents/$TEMPLATE_DIR" \
+              --jq '.[] | select(.name | test("[.]ya?ml$")) | .path')
+            [ -n "$tpl" ] || echo "No issue form has type $type; skipping the form check."
+          fi
+          if [ -n "$tpl" ]; then
+            while IFS=$'\t' read -r label ftype req; do
+              if ! grep -qxF "### $label" <<<"$body"; then
+                form_problems+=("Missing the '### $label' section."); continue
+              fi
+              [ "$ftype" = checkboxes ] && continue
+              section=$(awk -v h="### $label" '$0 == h {f=1; next} /^### / {f=0} f' <<<"$body" | sed '/^[[:space:]]*$/d')
+              if [ "$req" = true ] && { [ -z "$section" ] || [ "$section" = "_No response_" ]; }; then
+                form_problems+=("The required '$label' section is empty.")
+              elif [ "$ftype" = dropdown ] && [ -n "$section" ] && [ "$section" != "_No response_" ] \
+                && ! jq -e --arg l "$label" --arg s "$section" '.body[] | select(.attributes.label == $l) | .attributes.options | index($s)' <<<"$tpl" >/dev/null; then
+                form_problems+=("The answer to '$label' isn't one of the form's options.")
+              fi
+            done < <(jq -r '.body[] | select(.attributes.label != null) | [.attributes.label, .type, ((.validations.required // false) | tostring)] | @tsv' <<<"$tpl")
+          fi
+
+          # 3. Apply the form's own labels to an issue that was not created through the web form
+          if [ -n "$tpl" ] && { [ "$ACTION" = opened ] || [ "$ACTION" = typed ]; }; then
+            form_labels=$(jq -r '.labels // [] | .[]' <<<"$tpl")
+            have=$(jq -r '.labels // [] | .[].name' <<<"$issue")
+            if [ -n "$form_labels" ] && ! grep -qxFf <(printf '%s\n' "$form_labels") <<<"$have"; then
+              while IFS= read -r l; do
+                gh issue edit "$NUM" -R "$repo" --add-label "$l" \
+                  || echo "::warning::Could not add the form label '$l' (does it exist in this repo?)"
+              done <<<"$form_labels"
+            fi
+          fi
+
+          settle needs-template "${form_problems[@]}"
+          settle claude-not-permitted "${claude_problems[@]}"
+          # Labels applied with this workflow's token don't start other workflows,
+          # so refresh the work-approval statuses explicitly
+          gh workflow run work-approval.yml -R "$repo" || true

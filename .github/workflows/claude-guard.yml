@@ -1,0 +1,49 @@
+# Reusable workflow: posts a `claude-guard` commit status on each pull request.
+# - PR contains Claude-assisted work (the AI-Assisted trailer, or Claude Code's default attribution text)
+#   and the repo is approved for Claude (custom property claude-enabled = true): passes, and labels the PR claude-assisted.
+# - PR contains Claude-assisted work and the repo is NOT approved: fails, so it cannot merge.
+# - No Claude markers: passes.
+# If the property cannot be read, the repo is treated as not approved (fails closed).
+# Called from each repo by .github/workflows/claude-guard.yml (see deploy/each-repo).
+name: claude-guard
+on:
+  workflow_call:
+    inputs:
+      marker_pattern: { type: string, default: 'AI-Assisted: claude-code|Generated with \[?Claude Code' }
+      assisted_label: { type: string, default: claude-assisted }
+      property: { type: string, default: claude-enabled }
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Claude-assisted work
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PATTERN: ${{ inputs.marker_pattern }}
+          LABEL: ${{ inputs.assisted_label }}
+          PROP: ${{ inputs.property }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"
+          post() {
+            gh api "repos/$repo/statuses/$SHA" -f state="$1" -f context=claude-guard \
+              -f description="${2:0:140}" >/dev/null
+            echo "PR #$PR: $1 - $2"
+          }
+          msgs=$(gh api --paginate "repos/$repo/pulls/$PR/commits" --jq '.[].commit.message')
+          if printf '%s\n%s' "$msgs" "$BODY" | grep -qiE "$PATTERN"; then
+            enabled=$(gh api "repos/$repo/properties/values" \
+              --jq ".[] | select(.property_name==\"$PROP\") | .value" 2>/dev/null || true)
+            if [ "$enabled" = "true" ]; then
+              gh pr edit "$PR" -R "$repo" --add-label "$LABEL" || echo "::warning::Could not add the $LABEL label"
+              post success "Claude-assisted work in a repo approved for Claude"
+            else
+              post failure "Claude-assisted work, but this repo is not approved for Claude ($PROP is not true)"
+            fi
+          else
+            gh pr edit "$PR" -R "$repo" --remove-label "$LABEL" >/dev/null 2>&1 || true
+            post success "No Claude markers"
+          fi

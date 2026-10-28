@@ -1,0 +1,85 @@
+# Reusable workflow: posts a `work-approval` commit status on each pull request.
+# It passes only when the PR's issue and that issue's parent both carry the approved label,
+# neither carries a blocking label, and the PR targets the right branch.
+# Called from each repo by .github/workflows/work-approval.yml (see deploy/each-repo).
+name: work-approval
+on:
+  workflow_call:
+    inputs:
+      approved_label: { type: string, default: approved }
+      exempt_prefixes: { type: string, default: "dependabot/ renovate/" }
+      project_type: { type: string, default: Project }
+      blocking_labels: { type: string, default: "needs-template claude-not-permitted" }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check work approval
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LABEL: ${{ inputs.approved_label }}
+          EXEMPT: ${{ inputs.exempt_prefixes }}
+          PROJECT_TYPE: ${{ inputs.project_type }}
+          BLOCKING: ${{ inputs.blocking_labels }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"; owner="${repo%/*}"; name="${repo#*/}"
+          default=$(gh repo view "$repo" --json defaultBranchRef -q .defaultBranchRef.name)
+          q='query($o:String!,$n:String!,$i:Int!){repository(owner:$o,name:$n){issue(number:$i){
+               labels(first:50){nodes{name}}
+               parent{number issueType{name} repository{nameWithOwner} labels(first:50){nodes{name}}}}}}'
+
+          check_pr() {
+            local pr=$1 head base sha issue data parent ptype p b
+            read -r head base sha < <(gh pr view "$pr" -R "$repo" \
+              --json headRefName,baseRefName,headRefOid \
+              -q '"\(.headRefName) \(.baseRefName) \(.headRefOid)"')
+            result() {
+              gh api "repos/$repo/statuses/$sha" -f state="$1" -f context=work-approval \
+                -f description="${2:0:140}" >/dev/null
+              echo "PR #$pr: $1 - $2"
+            }
+            for p in $EXEMPT; do [[ "$head" == "$p"* ]] && { result success "Exempt branch"; return; }; done
+            [[ "$head" =~ ^([0-9]+)- ]] || { result failure "Branch must be named <issue-number>-<type>-<text>"; return; }
+            issue=${BASH_REMATCH[1]}
+            data=$(gh api graphql -H "GraphQL-Features: sub_issues,issue_types" \
+              -f query="$q" -f o="$owner" -f n="$name" -F i="$issue" \
+              -q .data.repository.issue 2>/dev/null) || data=null
+            if [ -z "$data" ] || [ "$data" = "null" ]; then result failure "Issue #$issue not found or not readable"; return; fi
+            has() { jq -e --arg l "$2" "$1 | any(.[]; .name == \$l)" <<<"$data" >/dev/null; }
+            has '.labels.nodes' "$LABEL" || { result failure "Issue #$issue is not labelled $LABEL"; return; }
+            for b in $BLOCKING; do
+              has '.labels.nodes' "$b" && { result failure "Issue #$issue has the $b label"; return; }
+            done
+            parent=$(jq -r '.parent.number // empty' <<<"$data")
+            if [ -z "$parent" ]; then
+              if [ "$base" = "$default" ]; then result success "#$issue approved; no parent, into $default"
+              else result failure "#$issue has no parent, so it must merge into $default"; fi
+              return
+            fi
+            [ "$(jq -r .parent.repository.nameWithOwner <<<"$data")" = "$repo" ] \
+              || { result failure "Parent of #$issue is in another repo"; return; }
+            has '.parent.labels.nodes' "$LABEL" || { result failure "Parent #$parent is not labelled $LABEL"; return; }
+            for b in $BLOCKING; do
+              has '.parent.labels.nodes' "$b" && { result failure "Parent #$parent has the $b label"; return; }
+            done
+            ptype=$(jq -r '.parent.issueType.name // ""' <<<"$data")
+            if [ "${ptype,,}" = "${PROJECT_TYPE,,}" ]; then
+              if [ "$base" = "$default" ]; then result success "#$issue and project #$parent approved"
+              else result failure "#$issue belongs to project #$parent, so it must merge into $default"; fi
+            elif [[ "$base" =~ ^$parent- ]]; then
+              result success "#$issue and parent #$parent approved"
+            else
+              result failure "#$issue must merge into its parent's branch ($parent-*), not $base"
+            fi
+          }
+
+          if [ "$EVENT" != "pull_request_target" ]; then
+            for pr in $(gh pr list -R "$repo" --state open --limit 200 --json number -q '.[].number'); do
+              check_pr "$pr"
+            done
+          else
+            check_pr "$PR"
+          fi
